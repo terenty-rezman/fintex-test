@@ -51,7 +51,7 @@ def download_and_save(url: str, filename: str):
             r.raw.decode_content = True
             shutil.copyfileobj(r.raw, f)
 
-    print("downloaded to:", filename, "from:", url)
+    print("\nfrom:", url, "\ndownloaded to:", filename, )
     
 @sched.scheduled_job('interval', id='update_job', hours=5, next_run_time=datetime.now())
 def update_job():

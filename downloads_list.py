@@ -12,4 +12,4 @@ list = [
     }
 ]
 
-aliases = [item["alias"] for item in list]
+aliases = {item["alias"] for item in list}
