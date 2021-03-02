@@ -36,7 +36,7 @@ class db_connection:
         return True
 
 
-def query_dw_path(alias: str):
+def query_file_path(alias: str):
     with db_connection() as db:
         file = db.execute(
             'SELECT * FROM downloads WHERE alias = ?', (alias,)
@@ -48,7 +48,7 @@ def query_dw_path(alias: str):
         return None
 
 
-def update_dw_path(alias: str, path: str):
+def update_file_path(alias: str, path: str):
     with db_connection() as db:
         if db.execute(
             'SELECT * FROM downloads WHERE alias = ?', (alias,)
