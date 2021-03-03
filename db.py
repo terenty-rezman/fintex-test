@@ -38,32 +38,40 @@ class db_connection:
 
 def query_file_path(alias: str):
     with db_connection() as db:
-        file = db.execute(
-            'SELECT * FROM downloads WHERE alias = ?', (alias,)
-        ).fetchone()
+        return _query_file_path(db, alias)
 
-        if file:
-            return file["path"]
 
-        return None
+def _query_file_path(db, alias: str):
+    file = db.execute(
+        'SELECT * FROM downloads WHERE alias = ?', (alias,)
+    ).fetchone()
+
+    if file:
+        return file["path"]
+
+    return None
 
 
 def update_file_path(alias: str, path: str):
     with db_connection() as db:
-        if db.execute(
-            'SELECT * FROM downloads WHERE alias = ?', (alias,)
-        ).fetchone() is None:
-            db.execute(
-                'INSERT INTO downloads (alias, path) VALUES (?, ?)',
-                (alias, path)
-            )
-        else:
-            db.execute(
-                'UPDATE downloads SET path = ? WHERE alias = ?',
-                (path, alias)
-            )
+        return _update_file_path(db, alias, path)
 
-        db.commit()
+
+def _update_file_path(db, alias: str, path: str):
+    if db.execute(
+        'SELECT * FROM downloads WHERE alias = ?', (alias,)
+    ).fetchone() is None:
+        db.execute(
+            'INSERT INTO downloads (alias, path) VALUES (?, ?)',
+            (alias, path)
+        )
+    else:
+        db.execute(
+            'UPDATE downloads SET path = ? WHERE alias = ?',
+            (path, alias)
+        )
+
+    db.commit()
 
 
 @click.group()

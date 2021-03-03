@@ -12,25 +12,27 @@ import db
 
 sched = BlockingScheduler()
 
+
 def file_path_from(alias: str):
     variant_1 = os.path.join(dw.DIR, alias + "_1")
-    variant_2 =  os.path.join(dw.DIR, alias + "_2")
-    
-    if os.path.exists(variant_2):
-        return variant_1
+    variant_2 = os.path.join(dw.DIR, alias + "_2")
 
-    if os.path.exists(variant_1):
+    # ask db what file is currently in use
+    already_busy_path = db.query_file_path(alias)
+
+    if variant_1 == already_busy_path:
         return variant_2
 
     return variant_1
+
 
 def extract_file_extension(response):
     cd = response.headers.get("content-disposition")
     extension = None
     if cd:
-        _, params = cgi.parse_header(cd)   
+        _, params = cgi.parse_header(cd)
         extension = params.get("filename")
-    
+
     if not extension:
         fname = urlparse(response.url).path.split("/")[-1]
         extension = fname.split(".")[-1]
@@ -52,11 +54,12 @@ def download_and_save(url: str, filename: str):
             shutil.copyfileobj(r.raw, f)
 
     print("\nfrom:", url, "\ndownloaded to:", filename, )
-    
-@sched.scheduled_job('interval', id='update_job', hours=5, next_run_time=datetime.now())
+
+
+@sched.scheduled_job('interval', id='update_job', seconds=5, next_run_time=datetime.now())
 def update_job():
     os.makedirs(dw.DIR, exist_ok=True)
-    
+
     for item in dw.list:
         alias = item["alias"]
         save_as = file_path_from(alias)
@@ -68,5 +71,6 @@ def update_job():
             continue
 
         db.update_file_path(alias, save_as)
+
 
 sched.start()
